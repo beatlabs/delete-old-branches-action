@@ -1,0 +1,57 @@
+#!/bin/bash
+
+set -eo pipefail
+
+[[ -n ${INPUT_REPO_TOKEN} ]] || { echo "Please set the REPO_TOKEN input"; exit 1; }
+[[ -n ${INPUT_DATE} ]] || { echo "Please specify a suitable date input for branch filtering"; exit 1; }
+
+BASE_URI="https://api.github.com"
+REPO="${GITHUB_REPOSITORY}"
+DATE=${INPUT_DATE}
+GITHUB_TOKEN=${INPUT_REPO_TOKEN}
+DRY_RUN=${INPUT_DRY_RUN:-true}
+
+branch_protected() {
+    local br=${1}
+
+    protected=$(curl -X GET -s -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+        "${BASE_URI}/repos/${REPO}/branches/${br}" | jq -r .protected)
+
+    # If we got null then something else happened (like no access error etc) so
+    # we can't determine the status for the branch
+    case ${protected} in
+        null) echo "Unable to determine status for branch: ${br}"; return 0 ;;
+        true) return 0 ;;
+        *) return 1 ;;
+    esac
+}
+
+delete_branch() {
+    local br=${1}
+
+    echo "Deleting: ${br}"
+    if [[ "${DRY_RUN}" == false ]]; then
+        status=$(curl -X DELETE -o /dev/null -s -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+                    -w "%{http_code}" "${BASE_URI}/repos/${REPO}/git/refs/heads/${br}")
+
+        case ${status} in
+            204) ;;
+            *) echo "Deletion of branch: ${br} failed" ;;
+        esac
+    else
+        echo "dry-run mode. Nothing changed!"
+    fi
+}
+
+main() {
+    # fetch history etc
+    git fetch --prune --unshallow
+    for br in $(git ls-remote -q --heads | sed "s@^.*heads/@@"); do
+        if [[ -z "$(git log --oneline -1 --since="${DATE}" origin/"${br}")" ]]; then
+            branch_protected "${br}" && echo "branch: ${br} is likely protected. Won't delete it" && continue
+            delete_branch "${br}"
+        fi
+    done
+}
+
+main "$@"

@@ -1,0 +1,19 @@
+# action.yml
+name: 'Delete old branches'
+description: 'Delete branches which are older than certain period of time'
+author: 'Markos Chandras'
+inputs:
+  repo_token:
+    description: 'The GITHUB_TOKEN secret'
+    required: true
+  date:
+    description: 'A git-log compatible date format'
+    required: true
+  dry_run:
+    description: 'Run in dry-run mode so no branches are deleted'
+    required: false
+    default: true
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
