@@ -1,5 +1,4 @@
 ![Linting](https://github.com/beatlabs/delete-old-branches-action/workflows/Linting/badge.svg)
-![Releases](https://github.com/beatlabs/delete-old-branches-action/workflows/Releases/badge.svg)
 # Delete Old Branches Action
 
 ## Introduction
