@@ -13,6 +13,10 @@ inputs:
     description: 'Run in dry-run mode so no branches are deleted'
     required: false
     default: true
+  delete_tags:
+    description: 'Also look for tags to delete'
+    required: false
+    default: false
 
 runs:
   using: 'docker'
