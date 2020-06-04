@@ -47,7 +47,7 @@ delete_branch_or_tag() {
 
 main() {
     # fetch history etc
-    git fetch --prune --unshallow
+    git fetch --prune --unshallow --tags
     for br in $(git ls-remote -q --heads | sed "s@^.*heads/@@"); do
         if [[ -z "$(git log --oneline -1 --since="${DATE}" origin/"${br}")" ]]; then
             branch_protected "${br}" && echo "branch: ${br} is likely protected. Won't delete it" && continue
