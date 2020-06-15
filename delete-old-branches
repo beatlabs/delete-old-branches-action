@@ -28,8 +28,7 @@ branch_protected() {
 }
 
 delete_branch_or_tag() {
-    local br=${1} ref="heads"
-    [[ "${DELETE_TAGS}" == true ]] && ref="tags"
+    local br=${1} ref="${2}"
 
     echo "Deleting: ${br}"
     if [[ "${DRY_RUN}" == false ]]; then
@@ -54,13 +53,13 @@ main() {
     for br in $(git ls-remote -q --heads | sed "s@^.*heads/@@"); do
         if [[ -z "$(git log --oneline -1 --since="${DATE}" origin/"${br}")" ]]; then
             branch_protected "${br}" && echo "branch: ${br} is likely protected. Won't delete it" && continue
-            delete_branch_or_tag "${br}"
+            delete_branch_or_tag "${br}" "heads"
         fi
     done
     if [[ "${DELETE_TAGS}" == true ]]; then
         for br in $(git ls-remote -q --tags | sed "s@^.*tags/@@"); do
             if [[ -z "$(git log --oneline -1 --since="${DATE}" "${br}")" ]]; then
-                delete_branch_or_tag "${br}"
+                delete_branch_or_tag "${br}" "tags"
             fi
         done
     fi
