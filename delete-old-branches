@@ -33,12 +33,15 @@ delete_branch_or_tag() {
 
     echo "Deleting: ${br}"
     if [[ "${DRY_RUN}" == false ]]; then
-        status=$(curl -X DELETE -o /dev/null -s -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+        status=$(curl -I -X DELETE -o debug.log -s -H "Authorization: Bearer ${GITHUB_TOKEN}" \
                     -w "%{http_code}" "${BASE_URI}/repos/${REPO}/git/refs/${ref}/${br}")
 
         case ${status} in
             204) ;;
-            *) echo "Deletion of branch: ${br} failed" ;;
+            *)  echo "Deletion of branch ${br} failed with http_status=${status}"
+                echo "===== Dumping curl call ====="
+                [[ -f debug.log ]] && cat debug.log
+                ;;
         esac
     else
         echo "dry-run mode. Nothing changed!"
