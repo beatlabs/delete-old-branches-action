@@ -2,7 +2,9 @@
 # Delete Old Branches Action
 
 ## Introduction
-This simple GitHub Action will delete branches and optionally tags that haven't received a commit recently. The time since last commit is configurable
+This simple GitHub Action will delete branches and optionally tags that haven't received a commit recently. The time since last commit is configurable.
+
+The default behaviour is to exclude Github protected branches. The alternative is to provide a list of prefixes using `include_prefixes` variable. For example, setting this variable to `foo,bar,baz` will only delete the branches whose name start either by `foo`, `bar` or `baz`.
 
 ## Disclaimer
 **Always** run the GitHub action in dry-run mode to ensure that it will do the right thing before you actually let it do it. Also make sure that you have a full copy of the repository (`git clone --mirror ...`) in case something goes bad
