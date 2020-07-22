@@ -27,6 +27,19 @@ branch_protected() {
     esac
 }
 
+prefix_filter() {
+    local br=${1}
+
+    for prefix in ${INPUT_INCLUDE_PREFIXES//,/ }
+    do
+      if [[ $br = $prefix* ]]; then
+        return 1
+      fi
+    done
+
+    return 0
+}
+
 delete_branch_or_tag() {
     local br=${1} ref="${2}"
 
@@ -53,6 +66,7 @@ main() {
     for br in $(git ls-remote -q --heads | sed "s@^.*heads/@@"); do
         if [[ -z "$(git log --oneline -1 --since="${DATE}" origin/"${br}")" ]]; then
             branch_protected "${br}" && echo "branch: ${br} is likely protected. Won't delete it" && continue
+            prefix_filter "${br}" && echo "branch: ${br} won't be deleted" && continue
             delete_branch_or_tag "${br}" "heads"
         fi
     done

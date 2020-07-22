@@ -17,6 +17,9 @@ inputs:
     description: 'Also look for tags to delete'
     required: false
     default: false
+  include_prefixes:
+    description: 'List of branch prefixes to be deleted'
+    required: false
 
 runs:
   using: 'docker'
