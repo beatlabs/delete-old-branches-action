@@ -63,7 +63,7 @@ delete_branch_or_tag() {
 main() {
     # fetch history etc
     git fetch --prune --unshallow --tags
-    for br in $(git ls-remote -q --heads | sed "s@^.*heads/@@"); do
+    for br in $(git ls-remote -q --heads --refs | sed "s@^.*heads/@@"); do
         if [[ -z "$(git log --oneline -1 --since="${DATE}" origin/"${br}")" ]]; then
             branch_protected "${br}" && echo "branch: ${br} is likely protected. Won't delete it" && continue
             prefix_filter "${br}" && echo "branch: ${br} won't be deleted" && continue
@@ -71,7 +71,7 @@ main() {
         fi
     done
     if [[ "${DELETE_TAGS}" == true ]]; then
-        for br in $(git ls-remote -q --tags | sed "s@^.*tags/@@"); do
+        for br in $(git ls-remote -q --tags --refs | sed "s@^.*tags/@@"); do
             if [[ -z "$(git log --oneline -1 --since="${DATE}" "${br}")" ]]; then
                 delete_branch_or_tag "${br}" "tags"
             fi
