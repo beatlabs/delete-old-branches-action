@@ -31,7 +31,8 @@ jobs:
           repo_token: ${{ github.token }}
           date: '3 months ago'
           dry_run: true
-          delete_tags: false
+          delete_tags: true
+          minimum_tags: 5
           extra_protected_branch_regex: ^(foo|bar)$
 ```
 Once you are happy switch, `dry_run` to `false` so the action actually does the job

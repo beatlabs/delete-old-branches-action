@@ -17,6 +17,10 @@ inputs:
     description: 'Also look for tags to delete'
     required: false
     default: false
+  minimum_tags:
+    descritpion: 'Minimum number of tags to keep'
+    required: false
+    default: false
   extra_protected_branch_regex:
     description: 'grep extended (ERE) compatible regex for additional branches to exclude'
     required: false

@@ -11,6 +11,7 @@ DATE=${INPUT_DATE}
 GITHUB_TOKEN=${INPUT_REPO_TOKEN}
 DRY_RUN=${INPUT_DRY_RUN:-true}
 DELETE_TAGS=${INPUT_DELETE_TAGS:-false}
+MINIMUM_TAGS=${INPUT_MINIMUM_TAGS:-0}
 EXCLUDE_BRANCH_REGEX=${INPUT_EXTRA_PROTECTED_BRANCH_REGEX:-^.*$}
 
 branch_protected() {
@@ -67,9 +68,15 @@ main() {
         fi
     done
     if [[ "${DELETE_TAGS}" == true ]]; then
-        for br in $(git ls-remote -q --tags --refs | sed "s@^.*tags/@@"); do
+        local tag_counter=1
+        for br in $(git ls-remote -q --tags --refs | sed "s@^.*tags/@@" | sort -rn); do
             if [[ -z "$(git log --oneline -1 --since="${DATE}" "${br}")" ]]; then
-                delete_branch_or_tag "${br}" "tags"
+                if [[ ${tag_counter} -gt ${MINIMUM_TAGS} ]]; then
+                    delete_branch_or_tag "${br}" "tags"
+                else
+                    echo "Not deleting tag ${br} due to minimum tag requirement(min: ${MINIMUM_TAGS})"
+                    ((tag_counter+=1))
+                fi
             fi
         done
     fi
