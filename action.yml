@@ -17,8 +17,8 @@ inputs:
     description: 'Also look for tags to delete'
     required: false
     default: false
-  include_prefixes:
-    description: 'List of branch prefixes to be deleted'
+  extra_protected_branch_regex:
+    description: 'grep extended (ERE) compatible regex for additional branches to exclude'
     required: false
 
 runs:

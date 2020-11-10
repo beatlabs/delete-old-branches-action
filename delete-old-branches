@@ -11,6 +11,7 @@ DATE=${INPUT_DATE}
 GITHUB_TOKEN=${INPUT_REPO_TOKEN}
 DRY_RUN=${INPUT_DRY_RUN:-true}
 DELETE_TAGS=${INPUT_DELETE_TAGS:-false}
+EXCLUDE_BRANCH_REGEX=${INPUT_EXTRA_PROTECTED_BRANCH_REGEX:-^.*$}
 
 branch_protected() {
     local br=${1}
@@ -27,17 +28,12 @@ branch_protected() {
     esac
 }
 
-prefix_filter() {
+extra_branch_protected() {
     local br=${1}
 
-    for prefix in ${INPUT_INCLUDE_PREFIXES//,/ }
-    do
-      if [[ $br = $prefix* ]]; then
-        return 1
-      fi
-    done
+    echo "${br}" | grep -qE "${EXCLUDE_BRANCH_REGEX}"
 
-    return 0
+    return $?
 }
 
 delete_branch_or_tag() {
@@ -66,7 +62,7 @@ main() {
     for br in $(git ls-remote -q --heads --refs | sed "s@^.*heads/@@"); do
         if [[ -z "$(git log --oneline -1 --since="${DATE}" origin/"${br}")" ]]; then
             branch_protected "${br}" && echo "branch: ${br} is likely protected. Won't delete it" && continue
-            prefix_filter "${br}" && echo "branch: ${br} won't be deleted" && continue
+            extra_branch_protected "${br}" && echo "branch: ${br} is explicitly protected and won't be deleted" && continue
             delete_branch_or_tag "${br}" "heads"
         fi
     done
