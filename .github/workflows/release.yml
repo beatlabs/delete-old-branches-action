@@ -7,9 +7,23 @@ on:
 jobs:
   tagged-release:
     name: "Release"
-    runs-on: "ubuntu-latest"
+    runs-on: ubuntu-latest
     steps:
-      - uses: "marvinpinto/action-automatic-releases@v1.1.0"
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Produce release body
+        id: git_log
+        uses: beatlabs/release-changelog-action@v0.0.2
         with:
-          repo_token: "${{ github.token }}"
+          tag_regex: "v[0-9]+.[0-9]+.[0-9]+$"
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1.1.4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          body: ${{ steps.git_log.outputs.release_body }}
+          draft: false
           prerelease: false
