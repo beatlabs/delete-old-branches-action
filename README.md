@@ -34,6 +34,7 @@ jobs:
           delete_tags: true
           minimum_tags: 5
           extra_protected_branch_regex: ^(foo|bar)$
+          exclude_open_pr_branches true
 ```
 Once you are happy switch, `dry_run` to `false` so the action actually does the job
 
