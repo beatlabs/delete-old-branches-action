@@ -44,7 +44,9 @@ is_pr_open_on_branch() {
     fi
 
     local br=${1}
-    open_prs_branches=$(gh pr list --state open --json headRefName | jq '.[].headRefName')
+    open_prs_branches=$(curl -H "Accept: application/vnd.github.v3+json" -H "Authorization: token ${GITHUB_TOKEN}" \
+                        "https://api.github.com/${REPO}/pulls" | jq '.[].head.ref')
+
     for pr_br in $open_prs_branches; do
         if [[ "${pr_br}" == "${br}" ]]; then
             return 0
