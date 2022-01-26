@@ -13,6 +13,7 @@ DRY_RUN=${INPUT_DRY_RUN:-true}
 DELETE_TAGS=${INPUT_DELETE_TAGS:-false}
 MINIMUM_TAGS=${INPUT_MINIMUM_TAGS:-0}
 EXCLUDE_BRANCH_REGEX=${INPUT_EXTRA_PROTECTED_BRANCH_REGEX:-^$}
+EXCLUDE_OPEN_PR_BRANCHES=${INPUT_EXCLUDE_OPEN_PR_BRANCHES:-true}
 
 branch_protected() {
     local br=${1}
@@ -35,6 +36,21 @@ extra_branch_protected() {
     echo "${br}" | grep -qE "${EXCLUDE_BRANCH_REGEX}"
 
     return $?
+}
+
+is_pr_open_on_branch() {
+    if [[ "${EXCLUDE_OPEN_PR_BRANCHES}" == false ]]; then
+        return 1
+    fi
+
+    local br=${1}
+    open_prs_branches=$(gh pr list --state open --json headRefName | jq '.[].headRefName')
+    for pr_br in $open_prs_branches; do
+        if [[ "${pr_br}" == "${br}" ]]; then
+            return 0
+        fi
+    done
+    return 1
 }
 
 delete_branch_or_tag() {
@@ -64,6 +80,7 @@ main() {
         if [[ -z "$(git log --oneline -1 --since="${DATE}" origin/"${br}")" ]]; then
             branch_protected "${br}" && echo "branch: ${br} is likely protected. Won't delete it" && continue
             extra_branch_protected "${br}" && echo "branch: ${br} is explicitly protected and won't be deleted" && continue
+            is_pr_open_on_branch "${br}" && echo "branch: ${br} has an open pull request and won't be deleted" && continue
             delete_branch_or_tag "${br}" "heads"
         fi
     done
