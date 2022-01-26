@@ -44,6 +44,9 @@ is_pr_open_on_branch() {
     fi
 
     local br=${1}
+    pr_output=$(curl -H "Accept: application/vnd.github.v3+json" -H "Authorization: token ${GITHUB_TOKEN}" \
+                        "https://api.github.com/${REPO}/pulls")
+    printf "PR OUT: %s" "${pr_output}"
     open_prs_branches=$(curl -H "Accept: application/vnd.github.v3+json" -H "Authorization: token ${GITHUB_TOKEN}" \
                         "https://api.github.com/${REPO}/pulls" | jq '.[].head.ref')
 
