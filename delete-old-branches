@@ -12,8 +12,24 @@ GITHUB_TOKEN=${INPUT_REPO_TOKEN}
 DRY_RUN=${INPUT_DRY_RUN:-true}
 DELETE_TAGS=${INPUT_DELETE_TAGS:-false}
 MINIMUM_TAGS=${INPUT_MINIMUM_TAGS:-0}
+DEFAULT_BRANCHES=${INPUT_DEFAULT_BRANCHES:-main,master}
 EXCLUDE_BRANCH_REGEX=${INPUT_EXTRA_PROTECTED_BRANCH_REGEX:-^$}
 EXCLUDE_TAG_REGEX=${INPUT_EXTRA_PROTECTED_TAG_REGEX:-^$}
+
+default_branch_protected() {
+    local br=${1}
+
+    local default_branches
+    default_branches=$(echo "${DEFAULT_BRANCHES}" | tr "," "\n")
+
+    for default_branch in $default_branches; do
+        if [[ "${br}" == "${default_branch}" ]]; then
+            return 0
+        fi
+    done
+
+    return 1
+}
 
 branch_protected() {
     local br=${1}
@@ -67,6 +83,7 @@ main() {
     git fetch --prune --unshallow --tags
     for br in $(git ls-remote -q --heads --refs | sed "s@^.*heads/@@"); do
         if [[ -z "$(git log --oneline -1 --since="${DATE}" origin/"${br}")" ]]; then
+            default_branch_protected "${br}" && echo "branch: ${br} is a default branch. Won't delete it" && continue
             branch_protected "${br}" && echo "branch: ${br} is likely protected. Won't delete it" && continue
             extra_branch_or_tag_protected "${br}" "branch" && echo "branch: ${br} is explicitly protected and won't be deleted" && continue
             delete_branch_or_tag "${br}" "heads"
@@ -77,7 +94,7 @@ main() {
         for br in $(git ls-remote -q --tags --refs | sed "s@^.*tags/@@" | sort -rn); do
             if [[ -z "$(git log --oneline -1 --since="${DATE}" "${br}")" ]]; then
                 if [[ ${tag_counter} -gt ${MINIMUM_TAGS} ]]; then
-                    extra_branch_or_tag_protected "${br}" "tag" && echo "tag: ${br} is explicitely proetected and won't be deleted" && continue
+                    extra_branch_or_tag_protected "${br}" "tag" && echo "tag: ${br} is explicitly protected and won't be deleted" && continue
                     delete_branch_or_tag "${br}" "tags"
                 else
                     echo "Not deleting tag ${br} due to minimum tag requirement(min: ${MINIMUM_TAGS})"
