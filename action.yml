@@ -24,6 +24,9 @@ inputs:
   extra_protected_branch_regex:
     description: 'grep extended (ERE) compatible regex for additional branches to exclude'
     required: false
+  extra_protected_tag_regex:
+    description: 'grep extended (ERE) compatible regex for additional tags to exclude'
+    required: false
 
 runs:
   using: 'docker'

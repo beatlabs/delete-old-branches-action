@@ -5,6 +5,7 @@
 This simple GitHub Action will delete branches and optionally tags that haven't received a commit recently. The time since last commit is configurable.
 
 The default behaviour is to exclude Github protected branches. Additional branches can be excluded using the `extra_protected_branch_regex` variable (see example below).
+Similarly, certain tags can be excluded using the `extra_protected_tag_regex` variable
 
 ## Disclaimer
 **Always** run the GitHub action in dry-run mode to ensure that it will do the right thing before you actually let it do it. Also make sure that you have a full copy of the repository (`git clone --mirror ...`) in case something goes bad
@@ -34,6 +35,7 @@ jobs:
           delete_tags: true
           minimum_tags: 5
           extra_protected_branch_regex: ^(foo|bar)$
+          extra_protected_tag_regex: '^v.*'
 ```
 Once you are happy switch, `dry_run` to `false` so the action actually does the job
 
