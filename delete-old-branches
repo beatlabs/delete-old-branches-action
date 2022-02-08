@@ -13,6 +13,7 @@ DRY_RUN=${INPUT_DRY_RUN:-true}
 DELETE_TAGS=${INPUT_DELETE_TAGS:-false}
 MINIMUM_TAGS=${INPUT_MINIMUM_TAGS:-0}
 EXCLUDE_BRANCH_REGEX=${INPUT_EXTRA_PROTECTED_BRANCH_REGEX:-^$}
+EXCLUDE_TAG_REGEX=${INPUT_EXTRA_PROTECTED_TAG_REGEX:-^$}
 
 branch_protected() {
     local br=${1}
@@ -29,10 +30,14 @@ branch_protected() {
     esac
 }
 
-extra_branch_protected() {
-    local br=${1}
+extra_branch_or_tag_protected() {
+    local br=${1} ref="${2}"
 
-    echo "${br}" | grep -qE "${EXCLUDE_BRANCH_REGEX}"
+    if [[ "${ref}" == "branch" ]]; then
+        echo "${br}" | grep -qE "${EXCLUDE_BRANCH_REGEX}"
+    elif [[ "${ref}" == "tag" ]]; then
+        echo "${br}" | grep -qE "${EXCLUDE_TAG_REGEX}"
+    fi
 
     return $?
 }
@@ -63,7 +68,7 @@ main() {
     for br in $(git ls-remote -q --heads --refs | sed "s@^.*heads/@@"); do
         if [[ -z "$(git log --oneline -1 --since="${DATE}" origin/"${br}")" ]]; then
             branch_protected "${br}" && echo "branch: ${br} is likely protected. Won't delete it" && continue
-            extra_branch_protected "${br}" && echo "branch: ${br} is explicitly protected and won't be deleted" && continue
+            extra_branch_or_tag_protected "${br}" "branch" && echo "branch: ${br} is explicitly protected and won't be deleted" && continue
             delete_branch_or_tag "${br}" "heads"
         fi
     done
@@ -72,6 +77,7 @@ main() {
         for br in $(git ls-remote -q --tags --refs | sed "s@^.*tags/@@" | sort -rn); do
             if [[ -z "$(git log --oneline -1 --since="${DATE}" "${br}")" ]]; then
                 if [[ ${tag_counter} -gt ${MINIMUM_TAGS} ]]; then
+                    extra_branch_or_tag_protected "${br}" "tag" && echo "tag: ${br} is explicitely proetected and won't be deleted" && continue
                     delete_branch_or_tag "${br}" "tags"
                 else
                     echo "Not deleting tag ${br} due to minimum tag requirement(min: ${MINIMUM_TAGS})"
