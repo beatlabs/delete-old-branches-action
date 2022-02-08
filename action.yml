@@ -21,6 +21,10 @@ inputs:
     descritpion: 'Minimum number of tags to keep'
     required: false
     default: false
+  default_branches:
+    description: 'Default branch(es) to exclude'
+    required: false
+    default: main,master
   extra_protected_branch_regex:
     description: 'grep extended (ERE) compatible regex for additional branches to exclude'
     required: false
