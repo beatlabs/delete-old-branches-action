@@ -1,33 +1,40 @@
 # action.yml
-name: 'Delete old branches'
-description: 'Delete branches which are older than certain period of time'
-author: 'Markos Chandras'
+name: "Delete old branches"
+description: "Delete branches which are older than certain period of time"
+author: "Markos Chandras"
 inputs:
   repo_token:
-    description: 'The GITHUB_TOKEN secret'
+    description: "The GITHUB_TOKEN secret"
     required: true
   date:
-    description: 'A git-log compatible date format'
+    description: "A git-log compatible date format"
     required: true
   dry_run:
-    description: 'Run in dry-run mode so no branches are deleted'
+    description: "Run in dry-run mode so no branches are deleted"
     required: false
     default: true
   delete_tags:
-    description: 'Also look for tags to delete'
+    description: "Also look for tags to delete"
     required: false
     default: false
   minimum_tags:
-    descritpion: 'Minimum number of tags to keep'
+    descritpion: "Minimum number of tags to keep"
     required: false
     default: false
+  default_branches:
+    description: "Default branch(es) to exclude"
+    required: false
+    default: main,master
   extra_protected_branch_regex:
-    description: 'grep extended (ERE) compatible regex for additional branches to exclude'
+    description: "grep extended (ERE) compatible regex for additional branches to exclude"
     required: false
   extra_protected_tag_regex:
-    description: 'grep extended (ERE) compatible regex for additional tags to exclude'
+    description: "grep extended (ERE) compatible regex for additional tags to exclude"
     required: false
-
+  exclude_open_pr_branches:
+    description: "Exclude branches that have an open pull request"
+    required: false
+    default: true
 runs:
-  using: 'docker'
-  image: 'Dockerfile'
+  using: "docker"
+  image: "Dockerfile"

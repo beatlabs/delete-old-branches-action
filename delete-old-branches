@@ -12,8 +12,25 @@ GITHUB_TOKEN=${INPUT_REPO_TOKEN}
 DRY_RUN=${INPUT_DRY_RUN:-true}
 DELETE_TAGS=${INPUT_DELETE_TAGS:-false}
 MINIMUM_TAGS=${INPUT_MINIMUM_TAGS:-0}
+DEFAULT_BRANCHES=${INPUT_DEFAULT_BRANCHES:-main,master}
 EXCLUDE_BRANCH_REGEX=${INPUT_EXTRA_PROTECTED_BRANCH_REGEX:-^$}
 EXCLUDE_TAG_REGEX=${INPUT_EXTRA_PROTECTED_TAG_REGEX:-^$}
+
+default_branch_protected() {
+    local br=${1}
+
+    local default_branches
+    default_branches=$(echo "${DEFAULT_BRANCHES}" | tr "," "\n")
+
+    for default_branch in $default_branches; do
+        if [[ "${br}" == "${default_branch}" ]]; then
+            return 0
+        fi
+    done
+
+    return 1
+}
+EXCLUDE_OPEN_PR_BRANCHES=${INPUT_EXCLUDE_OPEN_PR_BRANCHES:-true}
 
 branch_protected() {
     local br=${1}
@@ -42,6 +59,24 @@ extra_branch_or_tag_protected() {
     return $?
 }
 
+is_pr_open_on_branch() {
+    if [[ "${EXCLUDE_OPEN_PR_BRANCHES}" == false ]]; then
+        return 1
+    fi
+
+    local br=${1}
+    open_prs_branches=$(curl -X GET -s -H "Authorization: token ${GITHUB_TOKEN}" \
+        "${BASE_URI}/repos/${REPO}/pulls" | jq '.[].head.ref' | tr -d '"')
+
+    for pr_br in ${open_prs_branches}; do
+      if [[ "${pr_br}" == "${br}" ]]; then
+          return 0
+      fi
+    done
+
+    return 1
+}
+
 delete_branch_or_tag() {
     local br=${1} ref="${2}"
 
@@ -67,8 +102,11 @@ main() {
     git fetch --prune --unshallow --tags
     for br in $(git ls-remote -q --heads --refs | sed "s@^.*heads/@@"); do
         if [[ -z "$(git log --oneline -1 --since="${DATE}" origin/"${br}")" ]]; then
+            default_branch_protected "${br}" && echo "branch: ${br} is a default branch. Won't delete it" && continue
             branch_protected "${br}" && echo "branch: ${br} is likely protected. Won't delete it" && continue
             extra_branch_or_tag_protected "${br}" "branch" && echo "branch: ${br} is explicitly protected and won't be deleted" && continue
+            extra_branch_protected "${br}" && echo "branch: ${br} is explicitly protected and won't be deleted" && continue
+            is_pr_open_on_branch "${br}" && echo "branch: ${br} has an open pull request and won't be deleted" && continue
             delete_branch_or_tag "${br}" "heads"
         fi
     done
@@ -77,7 +115,7 @@ main() {
         for br in $(git ls-remote -q --tags --refs | sed "s@^.*tags/@@" | sort -rn); do
             if [[ -z "$(git log --oneline -1 --since="${DATE}" "${br}")" ]]; then
                 if [[ ${tag_counter} -gt ${MINIMUM_TAGS} ]]; then
-                    extra_branch_or_tag_protected "${br}" "tag" && echo "tag: ${br} is explicitely proetected and won't be deleted" && continue
+                    extra_branch_or_tag_protected "${br}" "tag" && echo "tag: ${br} is explicitly protected and won't be deleted" && continue
                     delete_branch_or_tag "${br}" "tags"
                 else
                     echo "Not deleting tag ${br} due to minimum tag requirement(min: ${MINIMUM_TAGS})"
