@@ -68,7 +68,7 @@ is_pr_open_on_branch() {
     open_prs_branches=$(curl -X GET -s -H "Authorization: token ${GITHUB_TOKEN}" \
         "${BASE_URI}/repos/${REPO}/pulls" | jq '.[].head.ref' | tr -d '"')
 
-    for pr_br in $open_prs_branches; do
+    for pr_br in ${open_prs_branches}; do
       if [[ "${pr_br}" == "${br}" ]]; then
           return 0
       fi
