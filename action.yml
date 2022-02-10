@@ -31,7 +31,6 @@ inputs:
   extra_protected_tag_regex:
     description: "grep extended (ERE) compatible regex for additional tags to exclude"
     required: false
-
   exclude_open_pr_branches:
     description: "Exclude branches that have an open pull request"
     required: false
