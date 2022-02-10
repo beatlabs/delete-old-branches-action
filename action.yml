@@ -35,7 +35,6 @@ inputs:
     description: "Exclude branches that have an open pull request"
     required: false
     default: true
-
 runs:
   using: "docker"
   image: "Dockerfile"
