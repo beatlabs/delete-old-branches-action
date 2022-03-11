@@ -10,7 +10,7 @@ The default behaviour is to exclude the default branch (main or master) and the 
 
 Additional branches can be excluded using the `extra_protected_branch_regex` variable (see example below).
 Similarly, certain tags can be excluded using the `extra_protected_tag_regex` variable.
-The default behaviour is to exclude Github protected branches as well as branches with open pull requests. Additional branches can be excluded using the `extra_protected_branch_regex` variable.  Branches with open pull requests can be ignored as well (see example below).  
+Also, branches with open pull requests are being ignored by default (see example below).  
 
 ## Disclaimer
 
