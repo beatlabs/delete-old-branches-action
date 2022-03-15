@@ -10,6 +10,7 @@ The default behaviour is to exclude the default branch (main or master) and the 
 
 Additional branches can be excluded using the `extra_protected_branch_regex` variable (see example below).
 Similarly, certain tags can be excluded using the `extra_protected_tag_regex` variable.
+Also, branches with open pull requests are being ignored by default (see example below).  
 
 ## Disclaimer
 
@@ -41,6 +42,7 @@ jobs:
           minimum_tags: 5
           extra_protected_branch_regex: ^(foo|bar)$
           extra_protected_tag_regex: '^v.*'
+          exclude_open_pr_branches: true
 ```
 
 Once you are happy switch, `dry_run` to `false` so the action actually does the job

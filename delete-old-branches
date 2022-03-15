@@ -15,6 +15,7 @@ MINIMUM_TAGS=${INPUT_MINIMUM_TAGS:-0}
 DEFAULT_BRANCHES=${INPUT_DEFAULT_BRANCHES:-main,master}
 EXCLUDE_BRANCH_REGEX=${INPUT_EXTRA_PROTECTED_BRANCH_REGEX:-^$}
 EXCLUDE_TAG_REGEX=${INPUT_EXTRA_PROTECTED_TAG_REGEX:-^$}
+EXCLUDE_OPEN_PR_BRANCHES=${INPUT_EXCLUDE_OPEN_PR_BRANCHES:-true}
 
 default_branch_protected() {
     local br=${1}
@@ -58,6 +59,24 @@ extra_branch_or_tag_protected() {
     return $?
 }
 
+is_pr_open_on_branch() {
+    if [[ "${EXCLUDE_OPEN_PR_BRANCHES}" == false ]]; then
+        return 1
+    fi
+
+    local br=${1}
+    open_prs_branches=$(curl -X GET -s -H "Authorization: token ${GITHUB_TOKEN}" \
+        "${BASE_URI}/repos/${REPO}/pulls" | jq '.[].head.ref' | tr -d '"')
+
+    for pr_br in ${open_prs_branches}; do
+      if [[ "${pr_br}" == "${br}" ]]; then
+          return 0
+      fi
+    done
+
+    return 1
+}
+
 delete_branch_or_tag() {
     local br=${1} ref="${2}"
 
@@ -86,6 +105,7 @@ main() {
             default_branch_protected "${br}" && echo "branch: ${br} is a default branch. Won't delete it" && continue
             branch_protected "${br}" && echo "branch: ${br} is likely protected. Won't delete it" && continue
             extra_branch_or_tag_protected "${br}" "branch" && echo "branch: ${br} is explicitly protected and won't be deleted" && continue
+            is_pr_open_on_branch "${br}" && echo "branch: ${br} has an open pull request and won't be deleted" && continue
             delete_branch_or_tag "${br}" "heads"
         fi
     done
