@@ -113,7 +113,7 @@ main() {
             delete_branch_or_tag "${br}" "heads"
         fi
     done
-    echo "::set-output name=deleted_branches::${deleted_branches[@]}"
+    echo "::set-output name=deleted_branches::" "${deleted_branches[@]}"
     if [[ "${DELETE_TAGS}" == true ]]; then
         local tag_counter=1
         for br in $(git ls-remote -q --tags --refs | sed "s@^.*tags/@@" | sort -rn); do
