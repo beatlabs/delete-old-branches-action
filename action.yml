@@ -35,6 +35,11 @@ inputs:
     description: "Exclude branches that have an open pull request"
     required: false
     default: true
+outputs:
+  was_dry_run:
+    description: "Ran in dry-run mode so no branches were deleted"
+  deleted_branches:
+    description: "List of branches that were deleted"
 runs:
   using: "docker"
   image: "Dockerfile"
