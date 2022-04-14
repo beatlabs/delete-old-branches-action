@@ -81,10 +81,11 @@ is_pr_open_on_branch() {
 }
 
 delete_branch_or_tag() {
-    local br=${1} ref="${2}"
+    local br=${1} ref="${2}" sha="${3}"
     deleted_branches+=("${br}")
 
     echo "Deleting: ${br}"
+    echo "To recreate run: git branch '${br}' '${sha}'"
     if [[ "${DRY_RUN}" == false ]]; then
         status=$(curl -I -X DELETE -o debug.log -s -H "Authorization: Bearer ${GITHUB_TOKEN}" \
                     -w "%{http_code}" "${BASE_URI}/repos/${REPO}/git/refs/${ref}/${br}")
@@ -103,14 +104,16 @@ delete_branch_or_tag() {
 
 main() {
     # fetch history etc
+    local sha
     git fetch --prune --unshallow --tags
     for br in $(git ls-remote -q --heads --refs | sed "s@^.*heads/@@"); do
         if [[ -z "$(git log --oneline -1 --since="${DATE}" origin/"${br}")" ]]; then
+            sha=$(git show-ref -s "origin/${br}")
             default_branch_protected "${br}" && echo "branch: ${br} is a default branch. Won't delete it" && continue
             branch_protected "${br}" && echo "branch: ${br} is likely protected. Won't delete it" && continue
             extra_branch_or_tag_protected "${br}" "branch" && echo "branch: ${br} is explicitly protected and won't be deleted" && continue
             is_pr_open_on_branch "${br}" && echo "branch: ${br} has an open pull request and won't be deleted" && continue
-            delete_branch_or_tag "${br}" "heads"
+            delete_branch_or_tag "${br}" "heads" "${sha}"
         fi
     done
     echo "::set-output name=deleted_branches::" "${deleted_branches[@]}"
