@@ -2,6 +2,10 @@
   "name": "@optimaxdev/action-delete_old_branches",
   "description": "GitHub action to delete old branches",
   "version": "1.0.0",
-  "dependencies": {
+  "devDependencies": {
+    "semantic-release": "^17.2.3"
+  },
+  "scripts": {
+    "semantic-release": "npx semantic-release"
   }
 }
