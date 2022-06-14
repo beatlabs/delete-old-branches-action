@@ -3,7 +3,7 @@
   "description": "GitHub action to delete old branches",
   "version": "1.0.0",
   "devDependencies": {
-    "semantic-release": "^17.2.3"
+    "@semantic-release": "^9.0.1"
   },
   "scripts": {
     "semantic-release": "npx semantic-release"
