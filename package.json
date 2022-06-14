@@ -1,0 +1,7 @@
+{
+  "name": "@optimaxdev/action-delete_old_branches",
+  "description": "GitHub action to delete old branches",
+  "version": "1.0.0",
+  "dependencies": {
+  }
+}
