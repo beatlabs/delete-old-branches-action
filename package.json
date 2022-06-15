@@ -3,7 +3,11 @@
   "description": "GitHub action to delete old branches",
   "version": "1.0.0",
   "devDependencies": {
-    "@semantic-release": "^9.0.1"
+    "semantic-release": "^9.0.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/optimaxdev/action-delete_old_branches.git"
   },
   "scripts": {
     "semantic-release": "npx semantic-release"
