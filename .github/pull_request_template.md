@@ -1,7 +1,5 @@
-<!--- Provide a general summary of your changes in the Title above -->
-## Description
-<!--- Describe your changes in detail -->
+## What I've done
+<!-- Please describe your changes in short -->
 
-#### Related Issues
-<!--- Does this relate to any issues? -->
-Addresses #
+## What problem I solved
+<!-- Please describe the issue you suppose to solve -->
