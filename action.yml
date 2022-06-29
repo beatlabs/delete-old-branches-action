@@ -18,7 +18,7 @@ inputs:
     required: false
     default: false
   minimum_tags:
-    descritpion: "Minimum number of tags to keep"
+    description: "Minimum number of tags to keep"
     required: false
     default: false
   default_branches:
