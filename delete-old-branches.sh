@@ -13,8 +13,6 @@ DRY_RUN=${INPUT_DRY_RUN:-true}
 DELETE_TAGS=${INPUT_DELETE_TAGS:-false}
 MINIMUM_TAGS=${INPUT_MINIMUM_TAGS:-0}
 DEFAULT_BRANCHES=${INPUT_DEFAULT_BRANCHES:-main,master}
-EXCLUDE_BRANCH_REGEX=${INPUT_EXTRA_PROTECTED_BRANCH_REGEX:-^$}
-EXCLUDE_TAG_REGEX=${INPUT_EXTRA_PROTECTED_TAG_REGEX:-^$}
 EXCLUDE_OPEN_PR_BRANCHES=${INPUT_EXCLUDE_OPEN_PR_BRANCHES:-true}
 
 echo "::set-output name=was_dry_run::${DRY_RUN}"
@@ -54,9 +52,9 @@ extra_branch_or_tag_protected() {
     local br=${1} ref="${2}"
 
     if [[ "${ref}" == "branch" ]]; then
-        echo "${br}" | grep -qE "${EXCLUDE_BRANCH_REGEX}"
+        echo "${br}" | grep -qiE "${EXCLUDE_BRANCH_REGEX}"
     elif [[ "${ref}" == "tag" ]]; then
-        echo "${br}" | grep -qE "${EXCLUDE_TAG_REGEX}"
+        echo "${br}" | grep -qiE "${EXCLUDE_TAG_REGEX}"
     fi
 
     return $?

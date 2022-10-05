@@ -1,7 +1,6 @@
 # action.yml
-name: "Delete old branches"
+name: "delete-stale-branch"
 description: "Delete branches which are older than certain period of time"
-author: "Markos Chandras"
 inputs:
   repo_token:
     description: "The GITHUB_TOKEN secret"
@@ -28,9 +27,11 @@ inputs:
   extra_protected_branch_regex:
     description: "grep extended (ERE) compatible regex for additional branches to exclude"
     required: false
+    default: '^$'
   extra_protected_tag_regex:
     description: "grep extended (ERE) compatible regex for additional tags to exclude"
     required: false
+    default: '^$'
   exclude_open_pr_branches:
     description: "Exclude branches that have an open pull request"
     required: false
@@ -41,5 +42,17 @@ outputs:
   deleted_branches:
     description: "List of branches that were deleted"
 runs:
-  using: "docker"
-  image: "Dockerfile"
+  using: "composite"
+  steps:
+    - shell: bash
+      run: |
+        export INPUT_REPO_TOKEN="${{ inputs.repo_token }}"
+        export INPUT_DATE="${{ inputs.date }}"
+        export INPUT_DRY_RUN="${{ inputs.dry_run }}"
+        export INPUT_DELETE_TAGS="${{ inputs.delete_tags }}"
+        export INPUT_MINIMUM_TAGS="${{ inputs.minimum_tags }}"
+        export INPUT_DEFAULT_BRANCHES="${{ inputs.default_branches }}"
+        export EXCLUDE_BRANCH_REGEX="${{ inputs.extra_protected_branch_regex }}"
+        export EXCLUDE_TAG_REGEX="${{ inputs.extra_protected_tag_regex }}"
+        export INPUT_EXCLUDE_OPEN_PR_BRANCHES="${{ inputs.exclude_open_pr_branches }}"
+        ${{ github.action_path }}/delete-old-branches.sh
