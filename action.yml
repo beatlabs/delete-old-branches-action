@@ -1,6 +1,7 @@
 # action.yml
-name: "delete-stale-branch"
+name: "Delete old branches"
 description: "Delete branches which are older than certain period of time"
+author: "Markos Chandras"
 inputs:
   repo_token:
     description: "The GITHUB_TOKEN secret"
