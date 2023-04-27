@@ -17,7 +17,7 @@ EXCLUDE_BRANCH_REGEX=${INPUT_EXTRA_PROTECTED_BRANCH_REGEX:-^$}
 EXCLUDE_TAG_REGEX=${INPUT_EXTRA_PROTECTED_TAG_REGEX:-^$}
 EXCLUDE_OPEN_PR_BRANCHES=${INPUT_EXCLUDE_OPEN_PR_BRANCHES:-true}
 
-echo "::set-output name=was_dry_run::${DRY_RUN}"
+echo "::save-state name=was_dry_run::${DRY_RUN}"
 deleted_branches=()
 
 default_branch_protected() {
@@ -117,7 +117,7 @@ main() {
             delete_branch_or_tag "${br}" "heads" "${sha}"
         fi
     done
-    echo "::set-output name=deleted_branches::" "${deleted_branches[@]}"
+    echo "::save-state name=deleted_branches::" "${deleted_branches[@]}"
     if [[ "${DELETE_TAGS}" == true ]]; then
         local tag_counter=1
         for br in $(git ls-remote -q --tags --refs | sed "s@^.*tags/@@" | sort -rn); do
