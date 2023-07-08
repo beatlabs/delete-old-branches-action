@@ -33,7 +33,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
       - name: Run delete-old-branches-action
-        uses: beatlabs/delete-old-branches-action@v0.0.9
+        uses: beatlabs/delete-old-branches-action@v0.0.10
         with:
           repo_token: ${{ github.token }}
           date: '3 months ago'
