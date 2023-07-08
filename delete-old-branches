@@ -6,7 +6,7 @@ set -eo pipefail
 [[ -n ${INPUT_DATE} ]] || { echo "Please specify a suitable date input for branch filtering"; exit 1; }
 
 BASE_URI="https://api.github.com"
-REPO="${GITHUB_REPOSITORY}"
+REPO="${INPUT_REPOSITORY:-$GITHUB_REPOSITORY}"
 DATE=${INPUT_DATE}
 GITHUB_TOKEN=${INPUT_REPO_TOKEN}
 DRY_RUN=${INPUT_DRY_RUN:-true}

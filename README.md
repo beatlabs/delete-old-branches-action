@@ -37,6 +37,7 @@ jobs:
         with:
           repo_token: ${{ github.token }}
           date: '3 months ago'
+          repository: foo/bar
           dry_run: true
           delete_tags: true
           minimum_tags: 5

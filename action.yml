@@ -9,6 +9,10 @@ inputs:
   date:
     description: "A git-log compatible date format"
     required: true
+  repository:
+    description: "The name of the repository - e.g. beatlabs/delete-old-branches-action"
+    required: false
+    default: ${{ github.repository }}
   dry_run:
     description: "Run in dry-run mode so no branches are deleted"
     required: false
