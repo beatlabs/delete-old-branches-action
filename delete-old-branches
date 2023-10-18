@@ -18,7 +18,8 @@ EXCLUDE_OPEN_PR_BRANCHES=${INPUT_EXCLUDE_OPEN_PR_BRANCHES:-true}
 # used for GitHub CLI authentication
 export GITHUB_TOKEN=${INPUT_REPO_TOKEN}
 
-echo "was_dry_run=${DRY_RUN}"  >> $GITHUB_OUTPUT
+echo "was_dry_run=${DRY_RUN}" >> "$GITHUB_OUTPUT"
+
 deleted_branches=()
 
 default_branch_protected() {
@@ -115,7 +116,7 @@ main() {
             delete_branch_or_tag "${br}" "heads" "${sha}"
         fi
     done
-    echo "deleted_branches=${deleted_branches[@]}"  >> $GITHUB_OUTPUT
+    echo "deleted_branches=${deleted_branches[*]}" >> "$GITHUB_OUTPUT"
     if [[ "${DELETE_TAGS}" == true ]]; then
         local tag_counter=1
         for br in $(git ls-remote -q --tags --refs | sed "s@^.*tags/@@" | sort -rn); do
