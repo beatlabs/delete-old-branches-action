@@ -5,10 +5,8 @@ set -eo pipefail
 [[ -n ${INPUT_REPO_TOKEN} ]] || { echo "Please set the REPO_TOKEN input"; exit 1; }
 [[ -n ${INPUT_DATE} ]] || { echo "Please specify a suitable date input for branch filtering"; exit 1; }
 
-BASE_URI="https://api.github.com"
 REPO="${GITHUB_REPOSITORY}"
 DATE=${INPUT_DATE}
-GITHUB_TOKEN=${INPUT_REPO_TOKEN}
 DRY_RUN=${INPUT_DRY_RUN:-true}
 DELETE_TAGS=${INPUT_DELETE_TAGS:-false}
 MINIMUM_TAGS=${INPUT_MINIMUM_TAGS:-0}
@@ -16,6 +14,9 @@ DEFAULT_BRANCHES=${INPUT_DEFAULT_BRANCHES:-main,master}
 EXCLUDE_BRANCH_REGEX=${INPUT_EXTRA_PROTECTED_BRANCH_REGEX:-^$}
 EXCLUDE_TAG_REGEX=${INPUT_EXTRA_PROTECTED_TAG_REGEX:-^$}
 EXCLUDE_OPEN_PR_BRANCHES=${INPUT_EXCLUDE_OPEN_PR_BRANCHES:-true}
+
+# used for GitHub CLI authentication
+export GITHUB_TOKEN=${INPUT_REPO_TOKEN}
 
 echo "was_dry_run=${DRY_RUN}"  >> $GITHUB_OUTPUT
 deleted_branches=()
@@ -38,8 +39,7 @@ default_branch_protected() {
 branch_protected() {
     local br=${1}
 
-    protected=$(curl -X GET -s -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-        "${BASE_URI}/repos/${REPO}/branches/${br}" | jq -r .protected)
+    protected=$(gh api "repos/${REPO}/branches/${br}" --jq '.protected')
 
     # If we got null then something else happened (like no access error etc) so
     # we can't determine the status for the branch
@@ -68,8 +68,7 @@ is_pr_open_on_branch() {
     fi
 
     local br=${1}
-    open_prs_branches=$(curl -X GET -s -H "Authorization: token ${GITHUB_TOKEN}" \
-        "${BASE_URI}/repos/${REPO}/pulls" | jq '.[].head.ref' | tr -d '"')
+    open_prs_branches=$(gh api "repos/${REPO}/pulls" --jq '.[].head.ref' --paginate)
 
     for pr_br in ${open_prs_branches}; do
       if [[ "${pr_br}" == "${br}" ]]; then
@@ -87,13 +86,12 @@ delete_branch_or_tag() {
     echo "Deleting: ${br}"
     echo "To recreate run: git branch '${br}' '${sha}'"
     if [[ "${DRY_RUN}" == false ]]; then
-        status=$(curl -I -X DELETE -o debug.log -s -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-                    -w "%{http_code}" "${BASE_URI}/repos/${REPO}/git/refs/${ref}/${br}")
+        status=$(gh api --method DELETE "repos/${REPO}/git/refs/${ref}/${br}" &> debug.log && echo ok || echo failed)
 
         case ${status} in
-            204) ;;
+            ok) ;;
             *)  echo "Deletion of branch ${br} failed with http_status=${status}"
-                echo "===== Dumping curl call ====="
+                echo "===== Dumping log ====="
                 [[ -f debug.log ]] && cat debug.log
                 ;;
         esac
