@@ -119,7 +119,7 @@ main() {
     echo "deleted_branches=${deleted_branches[*]}" >> "$GITHUB_OUTPUT"
     if [[ "${DELETE_TAGS}" == true ]]; then
         local tag_counter=1
-        for br in $(git ls-remote -q --tags --refs | sed "s@^.*tags/@@" | sort -rn); do
+        for br in $(git ls-remote -q --tags --refs | sed "s@^.*tags/@@" | sort -Vr); do
             if [[ -z "$(git log --oneline -1 --since="${DATE}" "${br}")" ]]; then
                 if [[ ${tag_counter} -gt ${MINIMUM_TAGS} ]]; then
                     extra_branch_or_tag_protected "${br}" "tag" && echo "tag: ${br} is explicitly protected and won't be deleted" && continue
